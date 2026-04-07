@@ -1,224 +1,599 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIT Campus Navigator</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{
-    font-family:'Space Grotesk',system-ui,sans-serif;
-    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-  }
-  .container{
-    max-width:900px;
-    background:white;
-    border-radius:20px;
-    box-shadow:0 20px 60px rgba(0,0,0,.3);
-    overflow:hidden;
-    animation:slideUp .6s ease;
-  }
-  @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIT Campus Navigator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --slate-50: #f8fafc;
+      --slate-100: #f1f5f9;
+      --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
+      --slate-700: #334155;
+      --slate-800: #1e293b;
+      --slate-900: #0f172a;
+      --accent: var(--primary);
+      --border: var(--slate-200);
+      --text-main: var(--slate-800);
+      --text-muted: var(--slate-500);
+      --bg: var(--slate-50);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); display: block; height: 100vh; overflow: hidden; color: var(--text-main); }
+    
+    .sidebar { 
+      position: absolute; 
+      top: 16px; 
+      left: 16px; 
+      bottom: 16px;
+      width: 380px; 
+      background: white;
+      border-radius: 20px; 
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--slate-200);
+      display: flex; 
+      flex-direction: column; 
+      z-index: 100; 
+      overflow: hidden;
+      animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+
+    .header { padding: 32px 24px; background: var(--slate-900); color: white; position: relative; overflow: hidden; }
+    .header::after { content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%); pointer-events: none; }
+    .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header p { font-size: 0.85rem; opacity: 0.6; margin-top: 6px; font-weight: 400; }
+    
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: rgba(79, 70, 229, 0.2); border: 1px solid rgba(79, 70, 229, 0.3); border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: #a5b4fc; text-transform: uppercase; margin-top: 16px; }
+    .status-dot { width: 6px; height: 6px; background: #818cf8; border-radius: 50%; box-shadow: 0 0 8px #818cf8; }
+
+    .content { padding: 24px; flex: 1; overflow-y: auto; }
+    .input-section { margin-bottom: 32px; }
+    .input-group { margin-bottom: 20px; position: relative; }
+    .input-group label { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: var(--slate-700); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
+    
+    .input-wrapper { position: relative; }
+    .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--slate-400); pointer-events: none; }
+
+    select { 
+      width: 100%; 
+      padding: 12px 16px 12px 42px; 
+      border: 1px solid var(--slate-200); 
+      border-radius: 12px; 
+      font-family: inherit; 
+      font-size: 0.95rem; 
+      color: var(--slate-900); 
+      outline: none; 
+      transition: all 0.2s; 
+      background: var(--slate-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center/16px; 
+      appearance: none; 
+    }
+    select:focus { border-color: var(--primary); background-color: white; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1); }
+    
+    .action-group { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+    .btn { 
+      padding: 14px; 
+      border: none; 
+      border-radius: 12px; 
+      font-family: 'Space Grotesk', sans-serif; 
+      font-size: 0.9rem; 
+      font-weight: 700; 
+      cursor: pointer; 
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+    }
+    .btn-primary { 
+      background: var(--primary); 
+      color: white; 
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); 
+    }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(79, 70, 229, 0.3); }
+    .btn-primary:active { transform: translateY(0); }
+    
+    .btn-secondary { background: var(--slate-100); color: var(--slate-700); }
+    .btn-secondary:hover { background: var(--slate-200); }
+    
+    .stats-card { 
+      margin-top: 32px; 
+      padding: 24px; 
+      border-radius: 16px; 
+      background: var(--slate-900); 
+      color: white;
+      display: none; 
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .stats-card.active { display: flex; animation: cardFocus 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
+    @keyframes cardFocus { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .stats-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); }
+    
+    .distance-display { font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem; font-weight: 700; color: white; margin-bottom: 2px; }
+    .distance-unit { font-size: 0.75rem; font-weight: 600; color: var(--slate-400); text-transform: uppercase; letter-spacing: 0.2em; }
+    
+    .map-container { position: absolute; top:0; left:0; width: 100%; height: 100%; overflow: hidden; background: #f1f5f9; z-index: 1; }
+    #container-inner { position: absolute; transform-origin: 0 0; }
+    #bg-image { position: absolute; top:0; left:0; user-select: none; pointer-events: none; filter: contrast(1.05) brightness(1.02); }
+    
+    .zoom-controls { position: absolute; top: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+    .zoom-btn { width: 44px; height: 44px; background: white; border: 1px solid var(--slate-200); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--slate-700); transition: all 0.2s; }
+    .zoom-btn:hover { background: var(--slate-50); border-color: var(--slate-300); color: var(--slate-900); transform: translateY(-1px); }
+    
+    .marker-group { cursor: pointer; pointer-events: all; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .marker-group:hover { transform: scale(1.25); z-index: 200; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)); }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   
-  .hero{
-    background:linear-gradient(135deg,#1a2744 0%,#2d4a7c 100%);
-    color:white;
-    padding:60px 40px;
-    text-align:center;
-    position:relative;
-    overflow:hidden;
-  }
-  .hero::before{
-    content:'';
-    position:absolute;
-    top:-50%;
-    right:-50%;
-    width:200%;
-    height:200%;
-    background:radial-gradient(circle,rgba(255,255,255,.1) 0%,transparent 70%);
-    animation:rotate 20s linear infinite;
-  }
-  @keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  
-  .hero-content{position:relative;z-index:1}
-  .logo{
-    width:80px;
-    height:80px;
-    background:linear-gradient(135deg,#4285f4,#34a853);
-    border-radius:20px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:36px;
-    font-weight:700;
-    margin-bottom:20px;
-    box-shadow:0 10px 30px rgba(66,133,244,.4);
-  }
-  h1{font-size:42px;margin-bottom:10px;font-weight:700}
-  .subtitle{font-size:18px;opacity:.9;margin-bottom:30px}
-  
-  .features{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:20px;
-    padding:40px;
-    background:#f8f9fa;
-  }
-  .feature{
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    text-align:center;
-    transition:all .3s;
-    border:2px solid transparent;
-  }
-  .feature:hover{
-    transform:translateY(-5px);
-    box-shadow:0 10px 30px rgba(0,0,0,.1);
-    border-color:#4285f4;
-  }
-  .feature-icon{
-    font-size:40px;
-    margin-bottom:15px;
-    display:block;
-  }
-  .feature h3{
-    font-size:16px;
-    color:#1a2744;
-    margin-bottom:8px;
-  }
-  .feature p{
-    font-size:13px;
-    color:#666;
-    line-height:1.5;
-  }
-  
-  .actions{
-    padding:40px;
-    text-align:center;
-    background:white;
-  }
-  .btn{
-    display:inline-block;
-    padding:16px 40px;
-    margin:10px;
-    border-radius:10px;
-    text-decoration:none;
-    font-weight:600;
-    font-size:16px;
-    transition:all .3s;
-    cursor:pointer;
-  }
-  .btn-primary{
-    background:#4285f4;
-    color:white;
-    box-shadow:0 4px 15px rgba(66,133,244,.4);
-  }
-  .btn-primary:hover{
-    background:#2d6fd4;
-    transform:translateY(-2px);
-    box-shadow:0 6px 20px rgba(66,133,244,.5);
-  }
-  .btn-secondary{
-    background:#f0f0f0;
-    color:#333;
-  }
-  .btn-secondary:hover{
-    background:#e0e0e0;
-    transform:translateY(-2px);
-  }
-  
-  .stats{
-    display:flex;
-    justify-content:space-around;
-    padding:30px 40px;
-    background:#1a2744;
-    color:white;
-  }
-  .stat{text-align:center}
-  .stat-number{
-    font-size:36px;
-    font-weight:700;
-    color:#4285f4;
-    display:block;
-  }
-  .stat-label{
-    font-size:14px;
-    opacity:.8;
-    margin-top:5px;
-  }
-  
-  @media(max-width:600px){
-    h1{font-size:32px}
-    .features{grid-template-columns:1fr;padding:20px}
-    .stats{flex-direction:column;gap:20px}
-  }
+    @keyframes bouncePin {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .bouncing-pin {
+      animation: bouncePin 0.8s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
+    }
+    
+    /* Flowing path animation */
+    @keyframes flow {
+      from { stroke-dashoffset: 24; }
+      to { stroke-dashoffset: 0; }
+    }
+    .flowing-path {
+      animation: flow 1.2s linear infinite;
+    }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="hero">
-    <div class="hero-content">
-      <div class="logo">CIT</div>
-      <h1>Campus Navigator</h1>
-      <p class="subtitle">Coimbatore Institute of Technology</p>
-      <p style="font-size:14px;opacity:.8">Interactive map with smart pathfinding & real-time animations</p>
-    </div>
-  </div>
-  
-  <div class="features">
-    <div class="feature">
-      <span class="feature-icon">🗺️</span>
-      <h3>Interactive Map</h3>
-      <p>Detailed campus layout with all buildings and facilities</p>
+  <div class="sidebar">
+    <div class="header">
+      <h1>CIT Navigator Pro</h1>
+      <p>Campus Routing & Navigation Engine</p>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        System Active
+      </div>
     </div>
     
-    <div class="feature">
-      <span class="feature-icon">🎯</span>
-      <h3>Smart Routing</h3>
-      <p>Floyd-Warshall algorithm finds optimal paths instantly</p>
-    </div>
-    
-    <div class="feature">
-      <span class="feature-icon">✨</span>
-      <h3>Smooth Animations</h3>
-      <p>Google Maps-style route visualization</p>
-    </div>
-    
-    <div class="feature">
-      <span class="feature-icon">📱</span>
-      <h3>Mobile Ready</h3>
-      <p>Works perfectly on phones and tablets</p>
+    <div class="content">
+      <div class="input-section">
+        <div class="input-group">
+          <label>
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+            From Location
+          </label>
+          <div class="input-wrapper">
+            <select id="start-select"><option value="">Search starting point...</option></select>
+          </div>
+        </div>
+        
+        <div class="input-group">
+          <label>
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            To Destination
+          </label>
+          <div class="input-wrapper">
+            <select id="end-select"><option value="">Search destination...</option></select>
+          </div>
+        </div>
+        
+        <div class="action-group">
+          <button class="btn btn-primary" onclick="findRoute()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+            Generate Route
+          </button>
+          <button class="btn btn-secondary" onclick="clearMap()">Reset</button>
+        </div>
+      </div>
+      
+      <div class="stats-card" id="result-box">
+        <div class="distance-display" id="dist-val">0</div>
+        <div class="distance-unit">Total Distance (m)</div>
+      </div>
+      
+      <div id="error-msg" style="color: #ef4444; font-size: 0.8rem; margin-top: 20px; text-align: center; display: none; font-weight: 600; padding: 12px; background: #fee2e2; border-radius: 8px;">No path found. Connect coordinates.</div>
     </div>
   </div>
-  
-  <div class="stats">
-    <div class="stat">
-      <span class="stat-number">26</span>
-      <span class="stat-label">Campus Locations</span>
-    </div>
-    <div class="stat">
-      <span class="stat-number">60+</span>
-      <span class="stat-label">Route Nodes</span>
-    </div>
-    <div class="stat">
-      <span class="stat-number">O(V³)</span>
-      <span class="stat-label">Algorithm Complexity</span>
-    </div>
-  </div>
-  
-  <div class="actions">
-    <a href="map.html" class="btn btn-primary">🚀 Launch Navigator</a>
-    <a href="QUICKSTART.html" class="btn btn-secondary">📖 Quick Start Guide</a>
-  </div>
-</div>
 
+  <div class="map-container" id="map-container">
+    <div id="container-inner">
+      <img id="bg-image" src="map.png" alt="Campus Map" />
+      <svg id="svg" style="position: absolute; top: 0; left: 0; pointer-events: none;" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="shadow">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.4)" />
+          </filter>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        <g id="roads-layer"></g>
+        <g id="path-layer"></g>
+        <g id="pins-layer"></g>
+      </svg>
+    </div>
+    
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="adjustZoom(1.2)">+</button>
+      <button class="zoom-btn" onclick="adjustZoom(0.833)">-</button>
+    </div>
+  </div>
+
+  <script>
+    let appData = null;
+    let scale = 1, panX = 0, panY = 0;
+    let isDragging = false, startX, startY;
+    let animId;
+
+    // Wait for image load to set dimensions
+    const img = document.getElementById("bg-image");
+    img.onload = () => {
+      document.getElementById("svg").setAttribute("viewBox", `0 0 ${img.naturalWidth} ${img.naturalHeight}`);
+      document.getElementById("svg").style.width = img.naturalWidth + 'px';
+      document.getElementById("svg").style.height = img.naturalHeight + 'px';
+      document.getElementById("container-inner").style.width = img.naturalWidth + 'px';
+      document.getElementById("container-inner").style.height = img.naturalHeight + 'px';
+      
+      // Auto-center
+      const mapCont = document.getElementById("map-container");
+      scale = Math.min(mapCont.clientWidth / img.naturalWidth, mapCont.clientHeight / img.naturalHeight) * 0.9;
+      panX = (mapCont.clientWidth - img.naturalWidth * scale) / 2;
+      panY = (mapCont.clientHeight - img.naturalHeight * scale) / 2;
+      updateTransform();
+    };
+
+
+    // Load Data
+    fetch('/data').then(r => r.json()).then(data => {
+      appData = data;
+      populateDropdowns();
+      drawBackgroundRoads();
+      drawPins();
+    });
+
+    function populateDropdowns() {
+      const places = appData.places.features;
+      // Sort places by name for better UX
+      places.sort((a,b) => {
+        const idA = a.properties.id; const idB = b.properties.id; 
+        const nameMap = {
+          1:"Main Block", 2:"Auditorium", 3:"Football Ground", 4:"OAT", 5:"Badminton Court", 
+          6:"MSC Block", 7:"CIT Polytechnic", 8:"Mechanical Lab", 9:"IT Block", 10:"Library Block", 
+          11:"Junk Yard", 12:"Canteen", 13:"Basketball Court", 14:"Blue Shed", 15:"Cricket Ground", 
+          16:"Vellingiri Hostel", 17:"Maruthamalai Hostel", 18:"Kailash Hostel", 19:"Thirumalai Hostel", 
+          20:"B Mess", 21:"Palani Hostel", 22:"Women's Hostel", 23:"Dispensary", 24:"CIT Store", 25:"A Mess"
+        };
+        return nameMap[idA].localeCompare(nameMap[idB]);
+      });
+
+      const sSel = document.getElementById('start-select');
+      const eSel = document.getElementById('end-select');
+      
+      const nameMap = {
+        1:"Main Block", 2:"Auditorium", 3:"Football Ground", 4:"OAT", 5:"Badminton Court", 
+        6:"MSC Block", 7:"CIT Polytechnic", 8:"Mechanical Lab", 9:"IT Block", 10:"Library Block", 
+        11:"Junk Yard", 12:"Canteen", 13:"Basketball Court", 14:"Blue Shed", 15:"Cricket Ground", 
+        16:"Vellingiri Hostel", 17:"Maruthamalai Hostel", 18:"Kailash Hostel", 19:"Thirumalai Hostel", 
+        20:"B Mess", 21:"Palani Hostel", 22:"Women's Hostel", 23:"Dispensary", 24:"CIT Store", 25:"A Mess"
+      };
+
+      places.forEach(f => {
+        const id = f.properties.id;
+        const name = nameMap[id] || `Place ${id}`;
+        sSel.innerHTML += `<option value="${id}">${name}</option>`;
+        eSel.innerHTML += `<option value="${id}">${name}</option>`;
+      });
+    }
+
+    function drawBackgroundRoads() {
+      const r_layer = document.getElementById('roads-layer');
+      appData.roads.features.forEach(f => {
+        if(f.geometry.type === 'MultiLineString') {
+          f.geometry.coordinates.forEach(line => {
+            const pts = line.map(c => `${c[0]},${-c[1]}`).join(' '); // Note: Y is flipped in standard geojsons sometimes, checking later
+            const p = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+            p.setAttribute("points", pts);
+            p.setAttribute("fill", "none");
+            p.setAttribute("stroke", "rgba(100,110,120,0.3)");
+            p.setAttribute("stroke-width", "4");
+            p.setAttribute("stroke-linecap", "round");
+            p.setAttribute("stroke-linejoin", "round");
+            r_layer.appendChild(p);
+          });
+        }
+      });
+    }
+
+    function drawPins() {
+      const pins_layer = document.getElementById('pins-layer');
+      const nameMap = {
+        1:"Main Block", 2:"Auditorium", 3:"Football Ground", 4:"OAT", 5:"Badminton Court", 
+        6:"MSC Block", 7:"CIT Polytechnic", 8:"Mechanical Lab", 9:"IT Block", 10:"Library Block", 
+        11:"Junk Yard", 12:"Canteen", 13:"Basketball Court", 14:"Blue Shed", 15:"Cricket Ground", 
+        16:"Vellingiri Hostel", 17:"Maruthamalai Hostel", 18:"Kailash Hostel", 19:"Thirumalai Hostel", 
+        20:"B Mess", 21:"Palani Hostel", 22:"Women's Hostel", 23:"Dispensary", 24:"CIT Store", 25:"A Mess"
+      };
+
+      appData.places.features.forEach(f => {
+        const id = f.properties.id;
+        const coords = f.geometry.coordinates;
+        // The geojson has negative Y, let's treat it correctly by mapping to positive pixel space
+        // Assuming image is standard coordinate space, let's just use what's there
+        // Actually, if Y is negative in geojson, we probably want to render it locally as -c[1]. Let's try it.
+        const px = coords[0], py = -coords[1];
+        
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        
+        g.classList.add("marker-group");
+        g.setAttribute("data-id", id);
+        g.setAttribute("transform", `translate(${px},${py})`);
+
+        g.onclick = () => selectPin(id);
+        
+        // Stylized Pin
+        const pin = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        pin.setAttribute("r", "8");
+        pin.setAttribute("fill", "#ff4d4d");
+        pin.setAttribute("stroke", "white");
+        pin.setAttribute("stroke-width", "2.5");
+        pin.setAttribute("filter", "url(#shadow)");
+        
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.textContent = nameMap[id] || `Place ${id}`;
+        label.setAttribute("y", "-15");
+        label.setAttribute("text-anchor", "middle");
+        label.setAttribute("fill", "#2d3436");
+        label.setAttribute("font-size", "11px");
+        label.setAttribute("font-weight", "600");
+        label.setAttribute("style", "paint-order: stroke; stroke: white; stroke-width: 3px; stroke-linecap: round; stroke-linejoin: round;");
+        
+        // Invisible clickable area
+        const clickArea = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        clickArea.setAttribute("r", "22");
+        clickArea.setAttribute("fill", "transparent");
+
+        g.appendChild(pin);
+        g.appendChild(label);
+        g.appendChild(clickArea);
+        pins_layer.appendChild(g);
+      });
+    }
+
+    let selStart = null, selEnd = null;
+    function selectPin(id) {
+      if(!selStart || (selStart && selEnd)) {
+        selStart = id; selEnd = null;
+        document.getElementById('start-select').value = id;
+        document.getElementById('end-select').value = '';
+      } else {
+        selEnd = id;
+        document.getElementById('end-select').value = id;
+        findRoute();
+      }
+    }
+
+    
+    async function findRoute() {
+      const s = document.getElementById('start-select').value;
+      const e = document.getElementById('end-select').value;
+      const modeNode = document.querySelector('input[name="mode"]:checked');
+      const mode = modeNode ? modeNode.value : "road";
+      
+      document.querySelectorAll('.marker-group').forEach(m => m.classList.remove('bouncing-pin'));
+      if (s) {
+        let p = document.querySelector(`.marker-group[data-id='${s}']`);
+        if(p) p.classList.add('bouncing-pin');
+      }
+      if (e) {
+        let p = document.querySelector(`.marker-group[data-id='${e}']`);
+        if(p) p.classList.add('bouncing-pin');
+      }
+
+      document.getElementById('error-msg').style.display = 'none';
+      document.getElementById('result-box').classList.remove('active');
+      clearMap(false);
+
+      if(!s || !e || s===e) return;
+      
+      try {
+        const res = await fetch(`/shortest-path?start=${s}&end=${e}&mode=${mode}`);
+        const data = await res.json();
+        
+        if(data.distance === -1 || data.path.length === 0) {
+          document.getElementById('error-msg').style.display = 'block';
+          return;
+        }
+
+        document.getElementById('dist-val').innerText = (data.distance * 0.354).toFixed(1);
+        document.getElementById('result-box').classList.add('active');
+
+        // Draw alternates
+        if (data.all_paths && data.all_paths.length > 0) {
+          data.all_paths.forEach(altCoords => {
+             const ap = altCoords.map(c => [c[0], -c[1]]);
+             drawPathLine(ap, 'rgba(150,150,150,0.5)', 4, false);
+          });
+        }
+        
+        // Draw fastest
+        const pathCoords = data.path.map(c => [c[0], -c[1]]);
+        drawPathLine(pathCoords, '#4285f4', 8, true);
+
+      } catch(ex) {
+        console.error(ex);
+        document.getElementById('error-msg').innerText = "An error occurred fetching the route.";
+        document.getElementById('error-msg').style.display = 'block';
+      }
+    }
+    function clearMap(resetDropdowns = true) {
+      if(animId) cancelAnimationFrame(animId);
+      document.getElementById('path-layer').innerHTML = '';
+      if(resetDropdowns){
+        selStart = null; selEnd = null;
+        document.getElementById('start-select').value = '';
+        document.getElementById('end-select').value = '';
+        document.getElementById('result-box').classList.remove('active');
+      }
+    }
+
+    
+    function drawPathLine(coords, color, width, isMain) {
+      const layer = document.getElementById('path-layer');
+      const pts = coords.map(c => c.join(',')).join(' ');
+
+      // Base path
+      const road = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      road.setAttribute("points", pts);
+      road.setAttribute("fill", "none");
+      road.setAttribute("stroke", color);
+      road.setAttribute("stroke-width", width);
+      road.setAttribute("stroke-linecap", "round");
+      road.setAttribute("stroke-linejoin", "round");
+      
+      let totLen = 0;
+      for(let i=1; i<coords.length; ++i) totLen += Math.hypot(coords[i][0]-coords[i-1][0], coords[i][1]-coords[i-1][1]);
+      
+      if (isMain) {
+          road.setAttribute("filter", "url(#shadow)");
+          
+          // Outer glow line
+          const glow = road.cloneNode();
+          glow.setAttribute("stroke", color);
+          glow.setAttribute("stroke-width", width * 1.5);
+          glow.setAttribute("opacity", "0.4");
+          glow.setAttribute("filter", "url(#glow)");
+          
+          // Running dots
+          const dots = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          dots.setAttribute("points", pts);
+          dots.setAttribute("fill", "none");
+          dots.setAttribute("stroke", "white");
+          dots.setAttribute("stroke-width", width / 4);
+          dots.setAttribute("stroke-dasharray", "12 12");
+          dots.classList.add("flowing-path");
+          
+          // Initial animate-in (drawing the line)
+          road.setAttribute("stroke-dasharray", totLen);
+          road.setAttribute("stroke-dashoffset", totLen);
+          road.style.transition = 'stroke-dashoffset 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          
+          layer.appendChild(glow);
+          layer.appendChild(road);
+          
+          // Trigger entry transition
+          setTimeout(() => {
+              road.setAttribute("stroke-dashoffset", "0");
+              setTimeout(() => {
+                layer.appendChild(dots);
+              }, 1500); 
+          }, 50);
+
+          if(coords.length > 1) {
+            const marker = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            const headGlow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            headGlow.setAttribute("r", "18"); headGlow.setAttribute("fill", "rgba(66, 133, 244, 0.4)");
+            const core = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            core.setAttribute("r", "10"); core.setAttribute("fill", "#1a73e8");
+            core.setAttribute("stroke", "white"); core.setAttribute("stroke-width", "3");
+            
+            const arr = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            arr.setAttribute("d", "M0,-5 L5,5 L0,3 L-5,5 Z");
+            arr.setAttribute("fill", "white");
+            
+            marker.appendChild(headGlow); marker.appendChild(core); marker.appendChild(arr);
+            layer.appendChild(marker);
+            
+            let segIdx = 0, distance = 0, speed = 5; // Standard speed
+            
+            function animateHead() {
+              if (segIdx >= coords.length - 1) segIdx = 0; 
+              let p1 = coords[segIdx], p2 = coords[segIdx+1];
+              let dx = p2[0] - p1[0], dy = p2[1] - p1[1];
+              let segLen = Math.hypot(dx, dy);
+              distance += speed;
+              if (distance >= segLen) {
+                distance -= segLen;
+                segIdx++;
+                if (segIdx >= coords.length - 1) { segIdx = 0; distance = 0; }
+                p1 = coords[segIdx]; p2 = coords[segIdx+1];
+                dx = p2[0] - p1[0]; dy = p2[1] - p1[1];
+                segLen = Math.hypot(dx, dy);
+              }
+              let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+              let t = distance / segLen;
+              let x = p1[0] + dx * t;
+              let y = p1[1] + dy * t;
+              marker.setAttribute("transform", `translate(${x},${y}) rotate(${angle})`);
+              headGlow.setAttribute("r", 15 + Math.sin(Date.now()/150)*5);
+              animId = requestAnimationFrame(animateHead);
+            }
+            // Start following after path has drawn halfway
+            setTimeout(() => { requestAnimationFrame(animateHead); }, 800);
+          }
+      } else {
+          road.setAttribute("stroke-dasharray", "10 5");
+          layer.appendChild(road);
+      }
+    }
+const container = document.getElementById("map-container");
+    const inner = document.getElementById("container-inner");
+    
+    function updateTransform() {
+      inner.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    }
+
+    function adjustZoom(factor) {
+      scale *= factor;
+      updateTransform();
+    }
+
+    container.addEventListener("mousedown", e => {
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+      container.style.cursor = "grabbing";
+    });
+    
+    window.addEventListener("mouseup", () => {
+      isDragging = false;
+      container.style.cursor = "default";
+    });
+    
+    window.addEventListener("mousemove", e => {
+      if(!isDragging) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateTransform();
+    });
+
+    container.addEventListener("wheel", e => {
+      e.preventDefault();
+      const zoomSensitivity = 0.001;
+      const delta = 1 - e.deltaY * zoomSensitivity;
+      
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      const oldPanX = panX;
+      const oldPanY = panY;
+      
+      scale *= delta;
+      
+      panX = mouseX - (mouseX - oldPanX) * delta;
+      panY = mouseY - (mouseY - oldPanY) * delta;
+      
+      updateTransform();
+    });
+  </script>
 </body>
 </html>
